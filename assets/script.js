@@ -24,8 +24,6 @@ function searchWeatherAndDisplay() {
   )
     .then((response) => response.json())
     .then((data) => {
-      console.log(data);
-
       document.querySelector("#current-weather-data #city-name").innerHTML =
         data.city.name +
         " " +
