@@ -1,5 +1,22 @@
-document.getElementById("search-form").onsubmit = (e) => {
-  e.preventDefault();
+function saveSearch(place) {
+  const limit = 5;
+  const savedSearch = JSON.parse(localStorage.getItem("search-history")) || [];
+  console.log("Current saved search", savedSearch, place);
+
+  if (savedSearch.includes(place)) {
+    const newSearchHistory = [
+      place,
+      ...savedSearch.filter((location) => location !== place),
+    ].slice(0, limit);
+    localStorage.setItem("search-history", JSON.stringify(newSearchHistory));
+  } else {
+    const newSearchHistory = [place, ...savedSearch].slice(0, limit);
+    localStorage.setItem("search-history", JSON.stringify(newSearchHistory));
+  }
+}
+
+// read city name from input, get weather data from api, then display
+function searchWeatherAndDisplay() {
   const cityInput = document.getElementById("city-input").value;
 
   fetch(
@@ -24,9 +41,11 @@ document.getElementById("search-form").onsubmit = (e) => {
 
       const weatherIcon = document.createElement("img");
       weatherIcon.src = `http://openweathermap.org/img/wn/${data.list[0].weather[0].icon}@2x.png`;
-      document
-        .querySelector("#current-weather-data #icon")
-        .appendChild(weatherIcon);
+      const containerIcon = document.querySelector(
+        "#current-weather-data #icon"
+      );
+      containerIcon.innerHTML = "";
+      containerIcon.appendChild(weatherIcon);
 
       // getting index 7, 15, 23, 31, 39
       [1, 2, 3, 4, 5].forEach((idx) => {
@@ -37,9 +56,11 @@ document.getElementById("search-form").onsubmit = (e) => {
 
         const forecastWeatherIcon = document.createElement("img");
         forecastWeatherIcon.src = `http://openweathermap.org/img/wn/${forecastData.weather[0].icon}@2x.png`;
-        document
-          .querySelector(`#day${idx} #icon${idx}`)
-          .appendChild(forecastWeatherIcon);
+        const forecastWeatherIconContainer = document.querySelector(
+          `#day${idx} #icon${idx}`
+        );
+        forecastWeatherIconContainer.innerHTML = "";
+        forecastWeatherIconContainer.appendChild(forecastWeatherIcon);
 
         document.querySelector(`#day${idx} #temp${idx}`).innerHTML =
           "Temp (F): " + forecastData.main.temp.toFixed(1);
@@ -50,4 +71,39 @@ document.getElementById("search-form").onsubmit = (e) => {
           "Wind speed: " + forecastData.wind.speed + "mph";
       });
     });
+}
+
+const generateHistory = () => {
+  const savedSearch = JSON.parse(localStorage.getItem("search-history")) || [];
+  const container = document.getElementById("history-container");
+  container.innerHTML = "";
+
+  savedSearch.forEach((place) => {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.innerHTML = place;
+    btn.onclick = () => {
+      // update the value of text input
+      document.getElementById("city-input").value = place;
+
+      // save search
+      saveSearch(place);
+
+      // display weather data
+      searchWeatherAndDisplay();
+
+      // generate new ordered list of history buttons
+      generateHistory();
+    };
+    container.appendChild(btn);
+  });
+};
+
+generateHistory();
+
+document.getElementById("search-form").onsubmit = (e) => {
+  e.preventDefault();
+  searchWeatherAndDisplay();
+  saveSearch(document.getElementById("city-input").value);
+  generateHistory();
 };
