@@ -20,7 +20,7 @@ function searchWeatherAndDisplay() {
   const cityInput = document.getElementById("city-input").value;
 
   fetch(
-    `https://api.openweathermap.org/data/2.5/forecast?q=${cityInput}&appid=42d98d76405f5b8038f2ad71187af430`
+    `https://api.openweathermap.org/data/2.5/forecast?q=${cityInput}&appid=2d474b8bb9c8ebfcc8d7188b32b44703`
   )
     .then((response) => response.json())
     .then((data) => {
